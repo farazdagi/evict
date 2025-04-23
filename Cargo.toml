@@ -2,6 +2,15 @@
 name = "evict"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+authors = ["Victor Farazdagi <farazdagi@gmail.com>"]
+description = "Cache eviction policies: LRU, LRU-k, Clock etc"
+homepage = "https://github.com/farazdagi/evict"
+repository = "https://github.com/farazdagi/evict"
+documentation = "https://docs.rs/evict"
+readme = "README.md"
+keywords = ["cache", "eviction", "cache-invalidation"]
+categories = ["algorithms", "data-structures"]
 
 [dependencies]
 thiserror = "2.0"
