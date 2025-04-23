@@ -1,0 +1,10 @@
+[package]
+name = "evict"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+thiserror = "2.0"
+parking_lot = "0.12"
+priority-queue = "2.0"
+chrono = "0.4"
