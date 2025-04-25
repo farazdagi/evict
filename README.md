@@ -41,9 +41,50 @@ cache. Depending on the workload, some of these policies might work better than 
 
 ## Usage
 
-TBD
+Everything spins around the [`EvictionPolicy`](crate::EvictionPolicy) trait. It abstracts the
+eviction functionality and provides a common interface for all eviction policies.
+
+### Basic usage (LRU)
+
+``` rust
+use {
+    evict::{EvictionPolicy, LruReplacer},
+    std::sync::Arc,
+};
+
+// Create a new LRU policy with a maximum size of 20 pages.
+let replacer = Arc::new(LruReplacer::new(20));
+
+// By default all pages are pinned and cannot be evicted.
+assert_eq!(replacer.size(), 0);
+assert_eq!(replacer.evict(), None);
+
+// Whenever a page is created in your page buffer, you should notify the policy.
+// This will mark as evictable pages 1, 2, 3.
+// .. new page is created in, say, buffer pool; notify the replacer:
+replacer.unpin(1);
+replacer.unpin(2);
+replacer.unpin(3);
+
+// Some page has been recently used, so we should notify the policy.
+replacer.touch(1);
+
+// Now the policy can evict pages.
+// Note that page 1 has been touched, so page 2 will be evicted.
+assert_eq!(replacer.evict(), Some(2));
+assert_eq!(replacer.size(), 2);
+
+assert_eq!(replacer.evict(), Some(3));
+assert_eq!(replacer.size(), 1);
+
+assert_eq!(replacer.evict(), Some(1));
+assert_eq!(replacer.size(), 0);
+
+assert_eq!(replacer.evict(), None);
+```
+
+More advanced usage examples can be found in the documentation for each eviction policy.
 
 ## License
 
 MIT
-

@@ -1,8 +1,10 @@
 use {
-    super::{AccessType, EvictionPolicy},
     crate::{
+        AccessType,
+        EvictError,
+        EvictResult,
+        EvictionPolicy,
         FrameId,
-        error::{EvictError, EvictResult},
         util::UniqueTimestampGenerator,
     },
     parking_lot::{RwLock, RwLockWriteGuard},
@@ -13,7 +15,8 @@ use {
 type Priority = Reverse<i64>;
 type Frames = PriorityQueue<FrameId, Priority>;
 
-pub struct LruPolicy {
+/// Least Recently Used (LRU) frame replacer.
+pub struct LruReplacer {
     inner: Arc<RwLock<Inner>>,
 }
 
@@ -29,7 +32,7 @@ struct Inner {
     seq: UniqueTimestampGenerator,
 }
 
-impl LruPolicy {
+impl LruReplacer {
     /// Creates a new LRU replacer.
     pub fn new(capacity: usize) -> Self {
         Self {
@@ -56,7 +59,7 @@ impl LruPolicy {
     }
 }
 
-impl EvictionPolicy for LruPolicy {
+impl EvictionPolicy for LruReplacer {
     type Error = EvictError;
 
     fn evict(&self) -> Option<FrameId> {
