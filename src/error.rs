@@ -2,14 +2,14 @@ use crate::FrameId;
 
 /// Cache eviction policy error.
 #[derive(Debug, PartialEq, thiserror::Error)]
-pub enum EvictError {
+pub enum EvictError<F: FrameId> {
     /// Invalid frame id.
     #[error("Invalid frame id: {0}")]
-    InvalidFrameId(FrameId),
+    InvalidFrameId(F),
 
     /// Trying to remove pinned frame.
     #[error("Trying to remove pinned frame: {0}")]
-    PinnedFrameRemoval(FrameId),
+    PinnedFrameRemoval(F),
 
     /// Cannot add any more pages to the frame replacer.
     #[error("Frame replacer is full")]
@@ -25,4 +25,4 @@ pub enum EvictError {
 }
 
 /// Cache eviction policy result type.
-pub type EvictResult<T> = Result<T, EvictError>;
+pub type EvictResult<T, F> = Result<T, EvictError<F>>;

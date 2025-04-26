@@ -57,20 +57,22 @@ use {
 let replacer = Arc::new(LruReplacer::new(20));
 assert_eq!(replacer.capacity(), 20);
 
-// By default all pages are pinned and are not candidates for eviction.
+// By default frames are pinned and are not candidates for eviction.
 assert_eq!(replacer.size(), 0);
 assert_eq!(replacer.evict(), None);
 
-// So, when creating a new page in, say, buffer pool, notify the replacer.
-// At this point replacer knows what page can be considered for eviction.
+// So, when creating a new page in, say, buffer pool,
+// notify the replacer by unpinning frames responsible for pages.
+// Once unpinned, frame is considered for eviction.
 replacer.unpin(1);
 replacer.unpin(2);
 replacer.unpin(3);
 
-// When a page is accessed, touch the frame -- it affects eviction order.
+// When a page is accessed, touch its frame in replacer.
+// In most polices it affects the eviction order.
 replacer.touch(1);
 
-// Since page 1 has been touched, page 2 will be the first to be evicted.
+// Frame 1 has been touched, so Frame 2 will be evicted first.
 assert_eq!(replacer.evict(), Some(2));
 assert_eq!(replacer.size(), 2);
 

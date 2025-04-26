@@ -12,27 +12,30 @@ use {
     std::{cmp::Reverse, sync::Arc},
 };
 
-type Priority = Reverse<i64>;
-type Frames = PriorityQueue<FrameId, Priority>;
 
 /// Least Recently Used (LRU) frame replacer.
-pub struct LruReplacer {
-    inner: Arc<RwLock<Inner>>,
+///
+/// This implementation uses a priority queue to manage the frames.
+/// The priority queue is ordered by the last access time of the frames. The
+/// most recently accessed frame is pushed to the back of the queue, while the
+/// least recently accessed item is the first to be evicted.
+pub struct LruReplacer<F: FrameId> {
+    inner: Arc<RwLock<Inner<F>>>,
 }
 
-struct Inner {
+struct Inner<F: FrameId> {
     /// Maximum number of frames that can be stored in the replacer.
     capacity: usize,
 
     /// Evictable frames in the replacer.
-    frames: Frames,
+    frames: PriorityQueue<F, Reverse<i64>>,
 
     /// Monotonically increasing sequence of timestamps.
     /// Used to determine the order and time of page accesses.
     seq: UniqueTimestampGenerator,
 }
 
-impl LruReplacer {
+impl<F: FrameId> LruReplacer<F> {
     /// Creates a new LRU replacer.
     pub fn new(capacity: usize) -> Self {
         Self {
@@ -44,7 +47,7 @@ impl LruReplacer {
         }
     }
 
-    fn push(mut inner: RwLockWriteGuard<'_, Inner>, id: FrameId) -> EvictResult<()> {
+    fn push(mut inner: RwLockWriteGuard<'_, Inner<F>>, id: F) -> EvictResult<(), F> {
         // Ensure that we are not beyond the capacity.
         if inner.frames.len() >= inner.capacity {
             return Err(EvictError::FrameReplacerFull);
@@ -59,29 +62,29 @@ impl LruReplacer {
     }
 }
 
-impl EvictionPolicy for LruReplacer {
-    type Error = EvictError;
+impl<F: FrameId> EvictionPolicy<F> for LruReplacer<F> {
+    type Error = EvictError<F>;
 
-    fn evict(&self) -> Option<FrameId> {
+    fn evict(&self) -> Option<F> {
         let mut inner = self.inner.write();
         inner.frames.pop().map(|(frame_id, _)| frame_id)
     }
 
-    fn peek(&self) -> Option<FrameId> {
+    fn peek(&self) -> Option<F> {
         let inner = self.inner.read();
         inner.frames.peek().map(|(frame_id, _)| *frame_id)
     }
 
-    fn touch(&self, id: FrameId) -> EvictResult<()> {
+    fn touch(&self, id: F) -> EvictResult<(), F> {
         Self::push(self.inner.write(), id)
     }
 
-    fn touch_with<T: AccessType>(&self, id: FrameId, _access_type: T) -> EvictResult<()> {
+    fn touch_with<T: AccessType>(&self, id: F, _access_type: T) -> EvictResult<(), F> {
         // No special handling for access type in LRU.
         self.touch(id)
     }
 
-    fn pin(&self, id: FrameId) -> EvictResult<()> {
+    fn pin(&self, id: F) -> EvictResult<(), F> {
         // If the frame is non-evictable, remove it from the queue.
         let mut inner = self.inner.write();
         inner.frames.remove(&id);
@@ -89,7 +92,7 @@ impl EvictionPolicy for LruReplacer {
         Ok(())
     }
 
-    fn unpin(&self, id: FrameId) -> EvictResult<()> {
+    fn unpin(&self, id: F) -> EvictResult<(), F> {
         let inner = self.inner.write();
 
         // Only insert if the frame is not already in the queue.
@@ -99,7 +102,7 @@ impl EvictionPolicy for LruReplacer {
         Ok(())
     }
 
-    fn remove(&self, id: FrameId) -> EvictResult<()> {
+    fn remove(&self, id: F) -> EvictResult<(), F> {
         let res = self.inner.write().frames.remove(&id);
         if res.is_none() {
             return Err(EvictError::PinnedFrameRemoval(id));
