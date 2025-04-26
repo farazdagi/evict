@@ -108,7 +108,7 @@ impl EvictionPolicy for LruReplacer {
     }
 
     fn capacity(&self) -> usize {
-        usize::MAX
+        self.inner.read().capacity
     }
 
     fn size(&self) -> usize {

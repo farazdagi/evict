@@ -13,26 +13,26 @@ pub use {
     replacer::LruReplacer,
 };
 
-/// Cache's frame identifier type.
+/// Frame identifier type.
 ///
-/// Conceptually, cache is assumed to be a fixed-size array of frames/slots,
-/// where each frame holds some page of data. The frame identifier is an index
-/// into this array.
+/// Conceptually, the replacement policy implementation is assumed to be a
+/// fixed-size array of frames, where each frame represents a container that
+/// holds some page of data. The frame identifier is an index into this array.
 pub type FrameId = usize;
 
 /// Page access type.
 ///
-/// When cached pages are accessed, some policies might log it differently based
-/// on nature of the access. For example, a page might be accessed for reading a
-/// single data point or for scanning of the whole page -- policies might
+/// When pages are accessed, some policies might log it differently based on
+/// nature of the access. For example, a page might be accessed for reading a
+/// single data point in it or for scanning of the whole page -- policies might
 /// want to distinguish between these access patterns.
 pub trait AccessType {}
 
-/// Cache frame eviction policy.
+/// Page eviction policy.
 ///
-/// Defines an interface for interacting with different cache eviction
+/// Defines an interface for interacting with different page replacement
 /// strategies. At its core, it provides methods for logging data access,
-/// managing metadata, and eventually locating the next frame to evict.
+/// managing meta-data, and eventually locating the next frame to evict.
 pub trait EvictionPolicy {
     /// Error type for the eviction policy.
     type Error: Error;

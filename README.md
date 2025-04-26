@@ -11,12 +11,13 @@ implementations.
 
 - [x] Multi-threaded: no problem wrapping the eviction policy in an `Arc<_>` and sharing it across
   threads.
-- [x] Support for custom data structures: the eviction policies are implemented as traits operating
-  on frame `IDs`, so you can implement your own data structure and use it with the policies.
-- [x] Support for custom eviction policies: the eviction policies are implemented as traits, so you
-  can implement your own eviction policy and use it with the library.
-- [ ] Both conventional and state of the art eviction policies out of the box:
-  - [x] `LRU` (Least Recently Used)
+- [x] Support for custom data structures: this crate abstracts the eviction policy, and thus it can
+  be used to support any data structure used to store actual pages (caches, buffer pools etc).
+  The library is designed to do one thing, but do it well.
+- [x] Support for custom eviction policies: implementing custom replacement policy is as easy as to
+  implement `EvictionPolicy` for your type.
+- [ ] Both conventional and state of the art eviction policies are provided out of the box:
+  - [x] [`LRU`](crate::LruReplacer) (Least Recently Used)
   - [ ] `MRU` (Most Recently Used)
   - [ ] `FIFO` (First In First Out)
   - [ ] `Random`
@@ -52,25 +53,24 @@ use {
     std::sync::Arc,
 };
 
-// Create a new LRU policy with a maximum size of 20 pages.
+// Create a new LRU policy with a maximum capacity of 20 frames.
 let replacer = Arc::new(LruReplacer::new(20));
+assert_eq!(replacer.capacity(), 20);
 
-// By default all pages are pinned and cannot be evicted.
+// By default all pages are pinned and are not candidates for eviction.
 assert_eq!(replacer.size(), 0);
 assert_eq!(replacer.evict(), None);
 
-// Whenever a page is created in your page buffer, you should notify the policy.
-// This will mark as evictable pages 1, 2, 3.
-// .. new page is created in, say, buffer pool; notify the replacer:
+// So, when creating a new page in, say, buffer pool, notify the replacer.
+// At this point replacer knows what page can be considered for eviction.
 replacer.unpin(1);
 replacer.unpin(2);
 replacer.unpin(3);
 
-// Some page has been recently used, so we should notify the policy.
+// When a page is accessed, touch the frame -- it affects eviction order.
 replacer.touch(1);
 
-// Now the policy can evict pages.
-// Note that page 1 has been touched, so page 2 will be evicted.
+// Since page 1 has been touched, page 2 will be the first to be evicted.
 assert_eq!(replacer.evict(), Some(2));
 assert_eq!(replacer.size(), 2);
 
