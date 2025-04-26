@@ -42,8 +42,8 @@ cache. Depending on the workload, some of these policies might work better than 
 
 ## Usage
 
-Everything spins around the [`EvictionPolicy`](crate::EvictionPolicy) trait. It abstracts the
-eviction functionality and provides a common interface for all eviction policies.
+Everything spins around the [`EvictionPolicy`](crate::EvictionPolicy) trait. It abstracts frame
+management and eviction functionality and provides a common interface for different algorithms.
 
 ### Basic usage (LRU)
 
@@ -72,13 +72,17 @@ replacer.unpin(3);
 // In most polices it affects the eviction order.
 replacer.touch(1);
 
+// At some point you may want to decide which frame to evict.
+
 // Frame 1 has been touched, so Frame 2 will be evicted first.
 assert_eq!(replacer.evict(), Some(2));
 assert_eq!(replacer.size(), 2);
 
+// Frame 3
 assert_eq!(replacer.evict(), Some(3));
 assert_eq!(replacer.size(), 1);
 
+// Frame 1 was touched the last, so it will be evicted last.
 assert_eq!(replacer.evict(), Some(1));
 assert_eq!(replacer.size(), 0);
 
