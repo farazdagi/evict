@@ -12,7 +12,6 @@ use {
     std::{cmp::Reverse, sync::Arc},
 };
 
-
 /// Least Recently Used (LRU) frame replacer.
 ///
 /// This implementation uses a priority queue to manage the frames.
@@ -72,7 +71,7 @@ impl<F: FrameId> EvictionPolicy<F> for LruReplacer<F> {
 
     fn peek(&self) -> Option<F> {
         let inner = self.inner.read();
-        inner.frames.peek().map(|(frame_id, _)| *frame_id)
+        inner.frames.peek().map(|(frame_id, _)| frame_id.clone())
     }
 
     fn touch(&self, id: F) -> EvictResult<(), F> {

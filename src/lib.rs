@@ -18,7 +18,7 @@ pub use {
 /// Conceptually, the replacement policy implementation is assumed to be a
 /// fixed-size array of frames, where each frame represents a container that
 /// holds some page of data. The frame identifier is an index into this array.
-pub trait FrameId: Copy + Hash + Eq + fmt::Display + fmt::Debug {}
+pub trait FrameId: Clone + Hash + Eq + fmt::Display + fmt::Debug {}
 
 impl<T> FrameId for T where T: Copy + Hash + Eq + fmt::Display + fmt::Debug {}
 
@@ -43,6 +43,10 @@ pub trait EvictionPolicy<F: FrameId> {
     ///
     /// Only non-pinned frames are candidates for eviction.
     /// Use [`EvictionPolicy::pin`] to pin frames.
+    ///
+    /// By default, all pages are pinned and it is the responsibility of the
+    /// clients to unpin them before the eviction policy implementer can
+    /// start evicting them.
     ///
     /// Successful eviction of a frame decreases the list size of non-pinned
     /// frames and potentially cleans the frame's access history.

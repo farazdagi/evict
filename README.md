@@ -9,13 +9,13 @@ implementations.
 
 ## Features
 
-- [x] Multi-threaded: no problem wrapping the eviction policy in an `Arc<_>` and sharing it across
-  threads.
 - [x] Support for custom data structures: this crate abstracts the eviction policy, and thus it can
   be used to support any data structure used to store actual pages (caches, buffer pools etc).
   The library is designed to do one thing, but do it well.
 - [x] Support for custom eviction policies: implementing custom replacement policy is as easy as to
   implement `EvictionPolicy` for your type.
+- [x] Multi-threaded: no problem wrapping the eviction policy in an `Arc<_>` and sharing it across
+  threads.
 - [ ] Both conventional and state of the art eviction policies are provided out of the box:
   - [x] [`LRU`](crate::LruReplacer) (Least Recently Used)
   - [ ] `MRU` (Most Recently Used)
@@ -40,6 +40,11 @@ to disk) when a new page is requested.
 The choice of eviction policy can have a significant impact on the performance of the database or
 cache. Depending on the workload, some of these policies might work better than the others.
 
+This crate provides a set of eviction policies that can be used to manage the eviction process in
+caches, buffer pools etc. So, it doesn't provide any data structures to store the pages, instead it
+concentrates on providing a flexible and efficient implementation of the eviction policies that you
+can use when implementing such data structures.
+
 ## Usage
 
 Everything spins around the [`EvictionPolicy`](crate::EvictionPolicy) trait. It abstracts frame
@@ -54,6 +59,7 @@ use {
 };
 
 // Create a new LRU policy with a maximum capacity of 20 frames.
+// All policies are thread-safe and can be shared across threads.
 let replacer = Arc::new(LruReplacer::new(20));
 assert_eq!(replacer.capacity(), 20);
 
