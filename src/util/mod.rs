@@ -1,3 +1,3 @@
-mod timestamp_generator;
+mod unique_sequence;
 
-pub use timestamp_generator::UniqueTimestampGenerator;
+pub use unique_sequence::UniqueSequence;

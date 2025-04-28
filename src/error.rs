@@ -22,6 +22,10 @@ pub enum EvictError<F: FrameId> {
     /// No free frames available.
     #[error("No free frames available (nor in free list nor in frame replacer)")]
     NoFramesAvailable,
+
+    /// Sequence generator arrived at maximum value.
+    #[error("Sequence generator exhausted")]
+    SequenceExhausted,
 }
 
 /// Cache eviction policy result type.

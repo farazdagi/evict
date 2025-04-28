@@ -16,20 +16,8 @@ implementations.
   implement `EvictionPolicy` for your type.
 - [x] Multi-threaded: no problem wrapping the eviction policy in an `Arc<_>` and sharing it across
   threads.
-- [ ] Both conventional and state of the art eviction policies are provided out of the box:
+- [x] Both conventional and state of the art eviction policies are provided out of the box (see Future Work section below):
   - [x] [`LRU`](crate::LruReplacer) (Least Recently Used)
-  - [ ] `MRU` (Most Recently Used)
-  - [ ] `FIFO` (First In First Out)
-  - [ ] `Random`
-  - [ ] `LRU-K` (Least Recently Used with K)
-  - [ ] `LFU` (Least Frequently Used)
-  - [ ] `2Q` (Two Queue)
-  - [ ] `LIRS` (Low Inter-reference Recency Set)
-  - [ ] `Clock`
-  - [ ] `ARC` (Adaptive Replacement Cache)
-  - [ ] `CAR` (Cache with Adaptive Replacement)
-  - [ ] `LRFU` (Least Recently/Frequently Used)
-  - [ ] `SLRU` (Segmented LRU)
 
 ## Motivation
 
@@ -96,6 +84,24 @@ assert_eq!(replacer.evict(), None);
 ```
 
 More advanced usage examples can be found in the documentation for each eviction policy.
+
+## Future work
+
+Expand the list of eviction policies to include more algorithms:
+
+- [ ] [`LRU-K`](crate::LruKReplacer) (LRU with access frequency tracking) (see
+  [paper](https://dl.acm.org/doi/10.1145/170036.170081))
+- [ ] `MRU` (Most Recently Used)
+- [ ] `FIFO` (First In First Out)
+- [ ] `Random`
+- [ ] `LFU` (Least Frequently Used)
+- [ ] `2Q` (Two Queue)
+- [ ] `LIRS` (Low Inter-reference Recency Set)
+- [ ] `Clock`
+- [ ] `ARC` (Adaptive Replacement Cache)
+- [ ] `CAR` (Cache with Adaptive Replacement)
+- [ ] `LRFU` (Least Recently/Frequently Used)
+- [ ] `SLRU` (Segmented LRU)
 
 ## License
 

@@ -1,12 +1,5 @@
 use {
-    crate::{
-        AccessType,
-        EvictError,
-        EvictResult,
-        EvictionPolicy,
-        FrameId,
-        util::UniqueTimestampGenerator,
-    },
+    crate::{AccessType, EvictError, EvictResult, EvictionPolicy, FrameId, util::UniqueSequence},
     parking_lot::{RwLock, RwLockWriteGuard},
     priority_queue::PriorityQueue,
     std::{cmp::Reverse, sync::Arc},
@@ -31,7 +24,7 @@ struct Inner<F: FrameId> {
 
     /// Monotonically increasing sequence of timestamps.
     /// Used to determine the order and time of page accesses.
-    seq: UniqueTimestampGenerator,
+    seq: UniqueSequence,
 }
 
 impl<F: FrameId> LruReplacer<F> {
@@ -41,7 +34,7 @@ impl<F: FrameId> LruReplacer<F> {
             inner: Arc::new(RwLock::new(Inner {
                 capacity,
                 frames: PriorityQueue::with_capacity(capacity),
-                seq: UniqueTimestampGenerator::new(),
+                seq: UniqueSequence::new(),
             })),
         }
     }
@@ -54,7 +47,7 @@ impl<F: FrameId> LruReplacer<F> {
 
         // If the accessed frame is already within the queue, update its priority.
         // Otherwise, insert it. Both cases are handled by the `push` method.
-        let priority = inner.seq.generate();
+        let priority = inner.seq.next().ok_or(EvictError::SequenceExhausted)?;
         inner.frames.push(id, Reverse(priority));
 
         Ok(())
