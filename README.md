@@ -16,8 +16,11 @@ implementations.
   implement `EvictionPolicy` for your type.
 - [x] Multi-threaded: no problem wrapping the eviction policy in an `Arc<_>` and sharing it across
   threads.
-- [x] Both conventional and state of the art eviction policies are provided out of the box (see Future Work section below):
+- [x] Both conventional and state of the art eviction policies are provided out of the box (see
+  Future Work section below):
   - [x] [`LRU`](crate::LruReplacer) (Least Recently Used)
+  - [x] [`LRU-K`](crate::LruKReplacer) (LRU with access frequency tracking) (see
+  [paper](https://dl.acm.org/doi/10.1145/170036.170081))
 
 ## Motivation
 
@@ -89,8 +92,6 @@ More advanced usage examples can be found in the documentation for each eviction
 
 Expand the list of eviction policies to include more algorithms:
 
-- [ ] [`LRU-K`](crate::LruKReplacer) (LRU with access frequency tracking) (see
-  [paper](https://dl.acm.org/doi/10.1145/170036.170081))
 - [ ] `MRU` (Most Recently Used)
 - [ ] `FIFO` (First In First Out)
 - [ ] `Random`

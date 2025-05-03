@@ -3,14 +3,15 @@
 #![deny(elided_lifetimes_in_paths)]
 
 mod error;
-mod replacer;
+/// Page replacement policy implementations.
+pub mod replacer;
 mod util;
 
 use std::{error::Error, fmt, hash::Hash};
 
 pub use {
     error::{EvictError, EvictResult},
-    replacer::LruReplacer,
+    replacer::{LruKConfig, LruKReplacer, LruReplacer},
 };
 
 /// Frame identifier type.
@@ -60,6 +61,10 @@ pub trait EvictionPolicy<F: FrameId> {
 
     /// Notifies the policy manager that a page controlled by the frame has been
     /// referenced/accessed.
+    ///
+    /// Touching the frame for the first time will add it to the list of
+    /// non-pinned. So, to register a frame, it is sufficient to either
+    /// [`touch()`](Self::touch) or [`unpin()`](Self::unpin) it.
     ///
     /// This normally updates the access history of a frame using the current
     /// timestamp.

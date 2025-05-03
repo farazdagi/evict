@@ -1,6 +1,6 @@
 use crate::FrameId;
 
-/// Cache eviction policy error.
+/// Page eviction strategy error.
 #[derive(Debug, PartialEq, thiserror::Error)]
 pub enum EvictError<F: FrameId> {
     /// Invalid frame id.

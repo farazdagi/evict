@@ -1,6 +1,6 @@
 [package]
 name = "evict"
-version = "0.2.3"
+version = "0.3.0"
 edition = "2024"
 license = "MIT"
 authors = ["Victor Farazdagi <farazdagi@gmail.com>"]
@@ -17,3 +17,4 @@ thiserror = "2.0"
 parking_lot = "0.12"
 priority-queue = "2.0"
 chrono = "0.4"
+hlc-gen = "1"

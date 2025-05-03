@@ -40,25 +40,50 @@ fn basic_ops() {
 
 #[test]
 fn touch() {
-    let replacer = LruReplacer::new(20);
+    {
+        let replacer = LruReplacer::new(20);
 
-    // Scenario: unpin elements, i.e. add them to the replacer.
-    replacer.unpin(1).unwrap();
-    replacer.unpin(2).unwrap();
-    replacer.unpin(3).unwrap();
-    assert_eq!(3, replacer.size());
+        // Scenario: unpin elements, i.e. add them to the replacer.
+        replacer.unpin(1).unwrap();
+        replacer.unpin(2).unwrap();
+        replacer.unpin(3).unwrap();
+        assert_eq!(3, replacer.size());
 
-    replacer.unpin(1).expect("cannot unpin 1"); // Unpin 1 again. It should have no effect.
-    assert_eq!(3, replacer.size());
-    assert_eq!(Some(1), replacer.peek());
+        replacer.unpin(1).expect("cannot unpin 1"); // Unpin 1 again. It should have no effect.
+        assert_eq!(3, replacer.size());
+        assert_eq!(Some(1), replacer.peek());
 
-    // However, if we access 1, it should be moved to the end of the queue.
-    replacer.touch(1).unwrap();
-    assert_eq!(Some(2), replacer.peek());
+        // However, if we access 1, it should be moved to the end of the queue.
+        replacer.touch(1).unwrap();
+        assert_eq!(Some(2), replacer.peek());
 
-    assert_eq!(replacer.evict(), Some(2));
-    assert_eq!(replacer.evict(), Some(3));
-    assert_eq!(replacer.evict(), Some(1));
+        assert_eq!(replacer.evict(), Some(2));
+        assert_eq!(replacer.evict(), Some(3));
+        assert_eq!(replacer.evict(), Some(1));
+    }
+
+    {
+        // The first touch should add the frame to the list of non-pinned frames.
+        let replacer = LruReplacer::new(20);
+
+        // Scenario: unpin elements by touching.
+        replacer.touch(1).unwrap();
+        replacer.touch(2).unwrap();
+        replacer.touch(3).unwrap();
+        assert_eq!(3, replacer.size());
+
+        replacer.unpin(1).expect("cannot unpin 1"); // Unpin 1 again. It should have no effect.
+        assert_eq!(3, replacer.size());
+        assert_eq!(Some(1), replacer.peek());
+
+        // However, if we access 1, it should be moved to the end of the queue.
+        replacer.touch(1).unwrap();
+        assert_eq!(Some(2), replacer.peek());
+
+        assert_eq!(replacer.evict(), Some(2));
+        assert_eq!(replacer.evict(), Some(3));
+        assert_eq!(replacer.evict(), Some(1));
+    }
 }
 
 #[test]
