@@ -5,7 +5,6 @@
 mod error;
 /// Page replacement policy implementations.
 pub mod replacer;
-mod util;
 
 use std::{error::Error, fmt, hash::Hash};
 

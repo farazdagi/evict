@@ -1,6 +1,6 @@
 [package]
 name = "evict"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 license = "MIT"
 authors = ["Victor Farazdagi <farazdagi@gmail.com>"]
@@ -9,7 +9,7 @@ homepage = "https://github.com/farazdagi/evict"
 repository = "https://github.com/farazdagi/evict"
 documentation = "https://docs.rs/evict"
 readme = "README.md"
-keywords = ["cache", "eviction", "page-replacement", "swap", "paging"]
+keywords = ["cache", "eviction", "page-replacement", "databases", "paging"]
 categories = ["algorithms", "data-structures"]
 
 [dependencies]

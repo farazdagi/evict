@@ -137,7 +137,7 @@ fn ref_period_early_eviction() {
     assert_eq!(1, replacer.size());
 
     // Make sure that 1 is evicted after `ref_period` elapses.
-    sleep(Duration::from_millis(100));
+    sleep(Duration::from_millis(101));
     assert_eq!(Some(1), replacer.evict());
     assert_eq!(0, replacer.size());
 }

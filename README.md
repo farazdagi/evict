@@ -20,7 +20,7 @@ implementations.
   Future Work section below):
   - [x] [`LRU`](crate::LruReplacer) (Least Recently Used)
   - [x] [`LRU-K`](crate::LruKReplacer) (LRU with access frequency tracking) (see
-  [paper](https://dl.acm.org/doi/10.1145/170036.170081))
+    [paper](https://dl.acm.org/doi/10.1145/170036.170081))
 
 ## Motivation
 
@@ -46,12 +46,11 @@ management and eviction functionality and provides a common interface for differ
 ``` rust
 use {
     evict::{EvictionPolicy, LruReplacer},
-    std::sync::Arc,
 };
 
 // Create a new LRU policy with a maximum capacity of 20 frames.
 // All policies are thread-safe and can be shared across threads.
-let replacer = Arc::new(LruReplacer::new(20));
+let replacer = LruReplacer::new(20);
 assert_eq!(replacer.capacity(), 20);
 
 // By default frames are pinned and are not candidates for eviction.
@@ -62,16 +61,20 @@ assert_eq!(replacer.evict(), None);
 // notify the replacer by unpinning frames responsible for pages.
 // Once unpinned, frame is considered for eviction.
 replacer.unpin(1);
-replacer.unpin(2);
+replacer.touch(2); // the first touch works as unpin
 replacer.unpin(3);
 
 // When a page is accessed, touch its frame in replacer.
 // In most polices it affects the eviction order.
+//
+// In LRU, the frame is moved to the very end of the list
+// of evictable candidates.
 replacer.touch(1);
 
 // At some point you may want to decide which frame to evict.
 
-// Frame 1 has been touched, so Frame 2 will be evicted first.
+// Frame 1 has been touched the last, so Frame 2 will be evicted.
+// Eviction order: 2 -> 3 -> 1
 assert_eq!(replacer.evict(), Some(2));
 assert_eq!(replacer.size(), 2);
 
